@@ -16,6 +16,7 @@
 #include <nav_msgs/Odometry.h>
 #include <tf/transform_datatypes.h>
 #include <tf/transform_broadcaster.h>
+#include <std_msgs/Float64.h>
 
 //pcl lib
 #include <pcl_conversions/pcl_conversions.h>
@@ -33,6 +34,8 @@ std::queue<sensor_msgs::PointCloud2ConstPtr> pointCloudSurfBuf;
 lidar::Lidar lidar_param;
 
 ros::Publisher pubLaserOdometry;
+ros::Publisher time_average;
+
 void velodyneSurfHandler(const sensor_msgs::PointCloud2ConstPtr &laserCloudMsg)
 {
     mutex_lock.lock();
@@ -50,6 +53,8 @@ bool is_odom_inited = false;
 double total_time =0;
 int total_frame=0;
 void odom_estimation(){
+    float time_delay  = 0;
+
     while(1){
         if(!pointCloudEdgeBuf.empty() && !pointCloudSurfBuf.empty()){
 
@@ -91,8 +96,10 @@ void odom_estimation(){
                 std::chrono::duration<float> elapsed_seconds = end - start;
                 total_frame++;
                 float time_temp = elapsed_seconds.count() * 1000;
-                total_time+=time_temp;
-                ROS_INFO("average odom estimation time %f ms \n \n", total_time/total_frame);
+                total_time+=time_temp;   
+                time_delay = total_time/total_frame;
+                ROS_INFO("average odom estimation time %f mS", time_delay);
+                time_delay = time_delay/1000.0;
             }
 
 
@@ -121,6 +128,10 @@ void odom_estimation(){
             laserOdometry.pose.pose.position.y = t_current.y();
             laserOdometry.pose.pose.position.z = t_current.z();
             pubLaserOdometry.publish(laserOdometry);
+
+            std_msgs::Float64 time_msg;
+            time_msg.data = time_delay*1000.0;
+            time_average.publish(time_msg);
 
         }
         //sleep 2 ms every time
@@ -158,6 +169,7 @@ int main(int argc, char **argv)
     ros::Subscriber subSurfLaserCloud = nh.subscribe<sensor_msgs::PointCloud2>("/laser_cloud_surf", 100, velodyneSurfHandler);
 
     pubLaserOdometry = nh.advertise<nav_msgs::Odometry>("/odom", 100);
+    time_average = nh.advertise<std_msgs::Float64>("/time_average", 100);
     std::thread odom_estimation_process{odom_estimation};
 
     ros::spin();
