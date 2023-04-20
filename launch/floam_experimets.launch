@@ -3,19 +3,19 @@
 
     
  
-    <!-- For Velodyne VLP-16 
+    <!-- For Velodyne VLP-16     -->
     <param name="scan_line" value="16" />
-    -->
+
 
     <!-- For Velodyne HDL-32 
     <param name="scan_line" value="32" />
     -->
 
-    <!-- For Velodyne HDL-64 -->
-    <param name="scan_line" value="16" />
+    <!-- For Velodyne HDL-64 
+    <param name="scan_line" value="64" />
+    -->
 
 
-    <!--- Sim Time -->
    
     <param name="scan_period" value="0.1" /> 
     <param name="vertical_angle" type="double" value="90.0" />
@@ -26,7 +26,7 @@
     <!--- -->
     <node pkg="floam" type="floam_odom_estimation_node" name="floam_odom_estimation_node" output="screen"/>
 
-    <param name="pcTopic" type="str" value="/velodyne_points" />
+    <param name="pcTopic" type="str" value="/pc_interpoled" />
     <node pkg="floam" type="floam_laser_processing_node" name="floam_laser_processing_node" output="screen"/>
     
 
