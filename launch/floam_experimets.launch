@@ -26,7 +26,7 @@
     <!--- -->
     <node pkg="floam" type="floam_odom_estimation_node" name="floam_odom_estimation_node" output="screen"/>
 
-    <param name="pcTopic" type="str" value="/pc_interpoled" />
+    <param name="pcTopic" type="str" value="/velodyne_points" />
     <node pkg="floam" type="floam_laser_processing_node" name="floam_laser_processing_node" output="screen"/>
     
 
